@@ -221,7 +221,12 @@ def build_from_params(model_key: str, params: dict, target: str = "combo"):
     from sklearn.multioutput import MultiOutputClassifier
 
     est = MODELS[model_key][1](optuna.trial.FixedTrial(params))
-    return MultiOutputClassifier(est) if target == "multilabel" else est
+    if target == "multilabel":
+        return MultiOutputClassifier(est)
+    # Combo labels such as "0010" are encoded as integers 0..15 inside the model: recent scikit-learn
+    # versions read number-like string labels as numbers in some steps (e.g. class_weight="balanced").
+    # The encoding keeps the sorted class order, so the fitted model is identical.
+    return LabelEncodedClassifier(est)
 
 
 MODELS = {

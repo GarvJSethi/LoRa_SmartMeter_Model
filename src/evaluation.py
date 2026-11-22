@@ -10,8 +10,8 @@ from .config import APPLIANCES
 
 
 def combo_to_labels(combos) -> np.ndarray:
-    """'0110' -> [0, 1, 1, 0] for an array of combo strings."""
-    return np.array([[int(c) for c in s] for s in combos], dtype=int)
+    """'0110' -> [0, 1, 1, 0] for an array of combo strings (also accepts 110 / '110')."""
+    return np.array([[int(c) for c in str(s).zfill(4)] for s in combos], dtype=int)
 
 
 def labels_to_combo(y: np.ndarray) -> np.ndarray:
