@@ -24,7 +24,7 @@ are ON** at any moment:
 | 4. Model A: snapshot classifiers + hyper-parameter tuning | [`04_model_A_snapshot.ipynb`](notebooks/04_model_A_snapshot.ipynb) | ✅ Done |
 | 5. Model B: event-based detector | [`05_model_B_event.ipynb`](notebooks/05_model_B_event.ipynb) | ✅ Done |
 | 6. Final comparison (incl. hybrid model) | [`06_final_comparison.ipynb`](notebooks/06_final_comparison.ipynb) | ✅ Done |
-| 7. Real-time Wi-Fi inference | `realtime/` | ⏳ Next |
+| 7. Live inference from the meter (serial / Tera Term log) | [`realtime/`](realtime/) | ✅ Ready for live testing |
 
 ## Result at a glance
 
@@ -244,3 +244,12 @@ jupyter lab notebooks/
 ```
 
 Run the notebooks in order (`01` → `06`).
+
+### Live test with the meter
+
+```bash
+python scripts/build_final_model.py                         # creates models/final_model.joblib
+python realtime/live_predict.py --port COM5 --baud 115200    # board connected by USB (Tera Term closed)
+```
+
+See [`realtime/README.md`](realtime/README.md) for the Tera Term log option and details.

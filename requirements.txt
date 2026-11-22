@@ -12,3 +12,4 @@ jupyter
 nbformat
 nbconvert
 ipykernel
+pyserial>=3.5
