@@ -20,8 +20,8 @@ are ON** at any moment:
 |---|---|---|
 | 1. Data loading & validation | [`01_data_loading.ipynb`](notebooks/01_data_loading.ipynb) | ✅ Done |
 | 2. Exploratory data analysis | [`02_eda.ipynb`](notebooks/02_eda.ipynb) | ✅ Done |
-| 3. Feature engineering | `03_feature_engineering.ipynb` | ⏳ Next |
-| 4. Model A: snapshot classifiers + hyper-parameter tuning | `04_model_A_snapshot.ipynb` | ⏳ |
+| 3. Feature engineering | [`03_feature_engineering.ipynb`](notebooks/03_feature_engineering.ipynb) | ✅ Done |
+| 4. Model A: snapshot classifiers + hyper-parameter tuning | `04_model_A_snapshot.ipynb` | ⏳ Next |
 | 5. Model B: event-based detector | `05_model_B_event.ipynb` | ⏳ |
 | 6. Final comparison (incl. hybrid model) | `06_final_comparison.ipynb` | ⏳ |
 | 7. Real-time Wi-Fi inference | `realtime/` | ⏳ |
@@ -72,6 +72,29 @@ power-sum consistency check can correct the event-based model.
 ![Additivity](reports/figures/11_additivity.png)
 
 More charts: [`reports/figures/`](reports/figures/)
+
+---
+
+## Feature engineering
+
+25 **causal** features (they only use the current and past samples), computed by one shared function
+([`src/features.py`](src/features.py)) for both training and the live stream. Replaying the test log sample by
+sample through the streaming builder gives exactly the same features as the offline computation.
+
+| Group | Features | Idea |
+|---|---|---|
+| Base | power, current, PF | The current reading |
+| Instant | clean PF, net current, estimated reactive power | Remove sensor noise and offset |
+| Rolling | power changes, rolling mean / std / min / max, 30 s slope, smoothed PF | Short-term behaviour |
+| Event memory | size, surge and PF change of the last switch, drift since then, time since it | What switched last, and how |
+
+**Finding:** the surge of the last switch and the power factor separate the straightener from the 100 W bulb best.
+But when these history features are given to a plain classifier, cross-validated accuracy **drops** (≈ 87 % → 78 %
+of samples with all 4 appliances right): the memory describes whichever appliance switched last, and the classifier
+memorises block-specific patterns. History needs to be used in a structured way, one state per appliance, which is
+what the event-based model does.
+
+![Feature ablation](reports/figures/19_feature_ablation.png)
 
 ---
 
