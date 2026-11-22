@@ -23,8 +23,20 @@ are ON** at any moment:
 | 3. Feature engineering | [`03_feature_engineering.ipynb`](notebooks/03_feature_engineering.ipynb) | ✅ Done |
 | 4. Model A: snapshot classifiers + hyper-parameter tuning | [`04_model_A_snapshot.ipynb`](notebooks/04_model_A_snapshot.ipynb) | ✅ Done |
 | 5. Model B: event-based detector | [`05_model_B_event.ipynb`](notebooks/05_model_B_event.ipynb) | ✅ Done |
-| 6. Final comparison (incl. hybrid model) | `06_final_comparison.ipynb` | ⏳ Next |
-| 7. Real-time Wi-Fi inference | `realtime/` | ⏳ |
+| 6. Final comparison (incl. hybrid model) | [`06_final_comparison.ipynb`](notebooks/06_final_comparison.ipynb) | ✅ Done |
+| 7. Real-time Wi-Fi inference | `realtime/` | ⏳ Next |
+
+## Result at a glance
+
+**Final model: Hybrid (event-based Model B v2, with start-up and corrections from Model A)**
+
+| | Rule-based | Model A | Model B v2 | **Hybrid (final)** |
+|---|---|---|---|---|
+| Cross-validation (all 4 appliances correct) | 0.842 | 0.898 | 0.939 | **0.939** |
+| Test block | 0.716 | 0.798 | 0.984 | **0.984** |
+| Start-up while appliances are already ON | 0.715 | 0.846 | 0.844 | **0.944** |
+
+![Final scorecard](reports/figures/37_final_scorecard.png)
 
 ---
 
@@ -174,6 +186,36 @@ test score is not fully blind; a new recording is needed for an independent esti
 ![Model A vs Model B](reports/figures/30_model_a_vs_b.png)
 
 ![Model B on the test block](reports/figures/32_model_b_test_timeline.png)
+
+---
+
+## Final comparison and hybrid model
+
+The **hybrid** is Model B v2 whose start-up state and power-sum corrections come from Model A instead of physics
+([`src/hybrid.py`](src/hybrid.py)). All candidates were re-evaluated the same way and stress-tested on conditions a
+real-time Wi-Fi meter will face:
+
+| | Rule-based | Model A | Model B v1 | Model B v2 | **Hybrid** |
+|---|---|---|---|---|---|
+| CV exact match | 0.842 | 0.898 | 0.927 | 0.939 | **0.939** |
+| Test exact match | 0.716 | 0.798 | 0.393 | 0.984 | **0.984** |
+| Start-up mid-use (mean) | 0.715 | 0.846 | 0.194 | 0.844 | **0.944** |
+| Extra noise σ = 5 W | 0.725 | 0.789 | 0.284 | 0.909 | 0.881 |
+| Extra noise σ = 20 W | 0.698 | 0.679 | 0.212 | 0.295 | 0.319 |
+| 10 % Wi-Fi packets lost | 0.716 | 0.795 | 0.356 | 0.970 | 0.956 |
+
+**Selection:** best CV score, ties broken by robustness. Model B v2 and the hybrid tie on CV and test; the hybrid
+recovers much better when tracking starts while appliances are already ON (reboot, Wi-Fi reconnect).
+
+**Limitations**
+- Event-based models need clean switches: with a lot of extra noise (σ ≥ 10 W on top of the meter's own ≈ 1.5 W, or
+  ≈ 13 W with the dryer) they fall below Model A. Averaging the live 1-second readings into 5-second means would
+  reduce noise ≈ 2.2×.
+- The Model B v2 / hybrid test score is optimistic, because the v2 rules were prompted by the test block. A new
+  recording of free household use is needed for an independent estimate.
+- One recording day, one house, 5-second resolution.
+
+![Start-up mid-use](reports/figures/35_cold_start.png)
 
 ---
 
