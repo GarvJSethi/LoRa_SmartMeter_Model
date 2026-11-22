@@ -1,7 +1,7 @@
 """Hyper-parameter tuning for Model B (event-based tracker) with Optuna.
 
-Tracker version 2 (power-sum check always on, second switches inside the settling window start a new
-event). Version 1 results are archived in reports/model_b/v1/.
+Tracker versions (see src/event_model.py): v1 results are in reports/model_b/v1/, v2 results in
+reports/model_b/ and v3 results (v2 + "what is left after an OFF switch" check) in reports/model_b/v3/.
 
 One study per event classifier. Each trial tunes the detector / tracker settings together with the
 classifier's own hyper-parameters. Objective: exact match (all 4 appliances correct) when tracking
@@ -13,7 +13,7 @@ PATIENCE consecutive trials (hard cap MAX_TRIALS). Finished studies are not re-r
 interruption); delete reports/model_b/trials/ to start from scratch.
 
 Usage:
-    python scripts/tune_model_b.py
+    python scripts/tune_model_b.py --version 3
 """
 from __future__ import annotations
 
@@ -36,8 +36,7 @@ from src.data_loader import load_events, load_labelled  # noqa: E402
 from src.evaluation import score  # noqa: E402
 from src.event_model import EVENT_CLASSIFIERS, block_sequences, event_training_table, make_tracker  # noqa: E402
 
-OUT_DIR = ROOT / "reports" / "model_b"
-TRIALS_DIR = OUT_DIR / "trials"
+OUT_DIRS = {1: ROOT / "reports" / "model_b" / "v1", 2: ROOT / "reports" / "model_b", 3: ROOT / "reports" / "model_b" / "v3"}
 MIN_TRIALS, PATIENCE, MAX_TRIALS = 100, 30, 250
 
 
@@ -49,14 +48,14 @@ def load():
     return df, seqs, table
 
 
-def lobo_track(trial, clf_key, df, seqs, table, report=None):
+def lobo_track(trial, clf_key, df, seqs, table, report=None, version=2):
     """Leave-one-block-out tracking on the training blocks. Returns (y_true, y_pred)."""
     blocks = [b for b in seqs if b != "F_test"]
     Y, P = [], []
     for step, b in enumerate(blocks):
         train_df = df[(df.split == "train") & (df.block != b)]
         tab = table[(table.block != b) & (table.block != "F_test")]
-        tracker = make_tracker(trial, clf_key, train_df, tab)
+        tracker = make_tracker(trial, clf_key, train_df, tab, version=version)
         seq = seqs[b]
         Y.append(seq[APPLIANCES].to_numpy(int))
         P.append(tracker.run(seq))
@@ -106,12 +105,12 @@ def summarise(clf_key, trials: pd.DataFrame) -> dict:
     }
 
 
-def run_study(clf_key, min_trials, patience, max_trials):
+def run_study(clf_key, min_trials, patience, max_trials, version=2):
     import optuna
 
     warnings.filterwarnings("ignore")
     optuna.logging.set_verbosity(optuna.logging.WARNING)
-    trials_file = TRIALS_DIR / f"{clf_key}.csv"
+    trials_file = OUT_DIRS[version] / "trials" / f"{clf_key}.csv"
     if trials_file.exists():
         return summarise(clf_key, pd.read_csv(trials_file))
 
@@ -123,7 +122,7 @@ def run_study(clf_key, min_trials, patience, max_trials):
             if trial.should_prune():
                 raise optuna.TrialPruned()
 
-        Y, P = lobo_track(trial, clf_key, df, seqs, table, report)
+        Y, P = lobo_track(trial, clf_key, df, seqs, table, report, version=version)
         m = score(Y, P)
         for k, v in m.items():
             trial.set_user_attr(k, v)
@@ -145,7 +144,7 @@ def run_study(clf_key, min_trials, patience, max_trials):
         study_name=clf_key,
     )
     study.optimize(objective, n_trials=max(max_trials, min_trials), callbacks=[plateau_stop])
-    TRIALS_DIR.mkdir(parents=True, exist_ok=True)
+    trials_file.parent.mkdir(parents=True, exist_ok=True)
     study.trials_dataframe().to_csv(trials_file, index=False)
     return summarise(clf_key, pd.read_csv(trials_file))
 
@@ -157,14 +156,15 @@ def main():
     ap.add_argument("--patience", type=int, default=PATIENCE)
     ap.add_argument("--max-trials", type=int, default=MAX_TRIALS)
     ap.add_argument("--classifiers", nargs="*", default=list(EVENT_CLASSIFIERS))
+    ap.add_argument("--version", type=int, default=3, choices=[1, 2, 3])
     args = ap.parse_args()
-    print(f"Trials per study: min {args.min_trials}, stop after {args.patience} trials without improvement, "
+    print(f"Tracker version {args.version}. Trials per study: min {args.min_trials}, stop after {args.patience} trials without improvement, "
           f"max {args.max_trials}", flush=True)
 
     t0 = time.time()
     results = []
     with ProcessPoolExecutor(max_workers=args.workers) as ex:
-        futs = {ex.submit(run_study, c, args.min_trials, args.patience, args.max_trials): c
+        futs = {ex.submit(run_study, c, args.min_trials, args.patience, args.max_trials, args.version): c
                 for c in args.classifiers}
         for i, fut in enumerate(as_completed(futs), 1):
             c = futs[fut]
@@ -178,9 +178,10 @@ def main():
                 print(f"[{i}/{len(futs)}] FAILED {c}: {e!r}", flush=True)
 
     res = pd.DataFrame(results).sort_values("cv_exact_match", ascending=False)
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    res.to_csv(OUT_DIR / "tuning_results.csv", index=False)
-    print(f"Done in {(time.time() - t0) / 60:.1f} min. Saved {OUT_DIR.relative_to(ROOT) / 'tuning_results.csv'}")
+    out_dir = OUT_DIRS[args.version]
+    out_dir.mkdir(parents=True, exist_ok=True)
+    res.to_csv(out_dir / "tuning_results.csv", index=False)
+    print(f"Done in {(time.time() - t0) / 60:.1f} min. Saved {out_dir.relative_to(ROOT) / 'tuning_results.csv'}")
     print(res[["classifier", "cv_exact_match", "cv_macro_f1", "n_trials"]].to_string(index=False))
 
 

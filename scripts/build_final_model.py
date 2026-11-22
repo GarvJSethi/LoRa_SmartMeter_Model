@@ -1,7 +1,7 @@
-"""Re-create models/final_model.joblib (the hybrid model selected in notebook 06) from the tuned settings.
+"""Re-create models/final_model.joblib (the selected hybrid model) from the tuned settings.
 
-Uses models/model_a_best.json and models/model_b_best.json, trains on all training blocks and saves the
-model used by realtime/live_predict.py.
+Reads the model description in models/final_model.json (written by the last model-selection notebook),
+trains on all training blocks and saves the model used by realtime/live_predict.py.
 
 Usage:
     python scripts/build_final_model.py
@@ -30,8 +30,9 @@ from src.models import build_from_params  # noqa: E402
 def main():
     warnings.filterwarnings("ignore")
     optuna.logging.set_verbosity(optuna.logging.WARNING)
-    meta_a = json.loads((MODELS_DIR / "model_a_best.json").read_text())
-    meta_b = json.loads((MODELS_DIR / "model_b_best.json").read_text())
+    final_meta = json.loads((MODELS_DIR / "final_model.json").read_text())
+    meta_a, meta_b = final_meta["model_a"], final_meta["model_b"]
+    version = int(final_meta.get("tracker_version", 2))
 
     df = load_labelled()
     seqs = block_sequences(df)
@@ -49,14 +50,14 @@ def main():
     model_a = build_from_params(meta_a["model"], meta_a["params"], "combo")
     model_a.fit(train[cols], labels_to_combo(train[APPLIANCES].to_numpy()))
 
-    # Model B v2 with Model A as corrector = hybrid
+    # Model B (event tracker) with Model A as corrector = hybrid
     final = make_tracker(optuna.trial.FixedTrial(meta_b["params"]), meta_b["classifier"],
                          df[df.split == "train"], table[table.block != "F_test"],
-                         corrector=ModelACorrector(model_a, cols), version=2)
+                         corrector=ModelACorrector(model_a, cols), version=version)
     final.reset()
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
     joblib.dump(final, MODELS_DIR / "final_model.joblib")
-    print(f"Saved {MODELS_DIR / 'final_model.joblib'}")
+    print(f"Saved {MODELS_DIR / 'final_model.joblib'}  ({final_meta['name']}, tracker v{version})")
 
 
 if __name__ == "__main__":

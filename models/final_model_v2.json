@@ -1,0 +1,72 @@
+{
+  "name": "Hybrid (B v2 + A)",
+  "description": "Event-based tracker (Model B v2) whose start-up state and power-sum corrections come from Model A",
+  "model_b": {
+    "classifier": "decision_tree",
+    "classifier_name": "Decision Tree",
+    "params": {
+      "change_cost_W": 15.6065191493337,
+      "lag": 3,
+      "margin_W": 23.52488403577912,
+      "max_depth": 3,
+      "min_samples_leaf": 8,
+      "persist": 4,
+      "threshold_W": 25.07144482168826,
+      "tolerance_W": 54.45137646049899
+    },
+    "event_features": [
+      "step_W",
+      "abs_step_W",
+      "surge_W",
+      "surge_ratio",
+      "pf_before",
+      "pf_after",
+      "pf_change",
+      "q_change_var",
+      "power_before_W",
+      "samples_after"
+    ],
+    "cv_exact_match": 0.9393428812131424,
+    "test_exact_match": 0.9836065573770492
+  },
+  "model_a": {
+    "model": "extra_trees",
+    "model_name": "Extra Trees",
+    "feature_set": "snapshot_plus",
+    "features": [
+      "power_W",
+      "current_A",
+      "pf",
+      "pf_clean",
+      "current_net_A",
+      "q_est_var"
+    ],
+    "params": {
+      "class_weight": "balanced",
+      "max_depth": 12,
+      "max_features": 1.0,
+      "min_samples_leaf": 11,
+      "n_estimators": 400
+    }
+  },
+  "input": [
+    "power_W",
+    "current_A",
+    "pf"
+  ],
+  "sample_period_s": 5,
+  "output": [
+    "hair_dryer",
+    "hair_straightener",
+    "bulb_200W",
+    "bulb_100W"
+  ],
+  "scores": {
+    "cv_exact_match": 0.9393428812131424,
+    "test_exact_match": 0.9836065573770492,
+    "cold_start_mean": 0.9438511613890067,
+    "cold_start_worst": 0.5344827586206896,
+    "noise_20W": 0.3191256830601093,
+    "packet_loss_10pct": 0.955835446242386
+  }
+}

@@ -1,18 +1,19 @@
 {
-  "name": "Hybrid (B v2 + A)",
-  "description": "Event-based tracker (Model B v2) whose start-up state and power-sum corrections come from Model A",
+  "name": "Hybrid (B v3 + A)",
+  "description": "Event-based tracker v3 (with the remaining-combination check for OFF switches) whose start-up state and power-sum corrections come from Model A",
   "model_b": {
     "classifier": "decision_tree",
     "classifier_name": "Decision Tree",
     "params": {
-      "change_cost_W": 15.6065191493337,
+      "change_cost_W": 22.841383925922784,
+      "fit_weight": 2.2723037752437896,
       "lag": 3,
-      "margin_W": 23.52488403577912,
+      "margin_W": 28.024753753446507,
       "max_depth": 3,
-      "min_samples_leaf": 8,
-      "persist": 4,
-      "threshold_W": 25.07144482168826,
-      "tolerance_W": 54.45137646049899
+      "min_samples_leaf": 5,
+      "persist": 6,
+      "threshold_W": 45.00540744850595,
+      "tolerance_W": 107.1920313117284
     },
     "event_features": [
       "step_W",
@@ -26,8 +27,7 @@
       "power_before_W",
       "samples_after"
     ],
-    "cv_exact_match": 0.9393428812131424,
-    "test_exact_match": 0.9836065573770492
+    "cv_exact_match": 0.9629317607413648
   },
   "model_a": {
     "model": "extra_trees",
@@ -62,11 +62,10 @@
     "bulb_100W"
   ],
   "scores": {
-    "cv_exact_match": 0.9393428812131424,
-    "test_exact_match": 0.9836065573770492,
-    "cold_start_mean": 0.9438511613890067,
-    "cold_start_worst": 0.5344827586206896,
-    "noise_20W": 0.3191256830601093,
-    "packet_loss_10pct": 0.955835446242386
-  }
+    "cv_exact_match": 0.9629317607413648,
+    "test_exact_match": 0.9508196721311475,
+    "live_session_1_exact_match": 0.9411764705882353,
+    "cold_start_mean": 0.8585844752349406
+  },
+  "tracker_version": 3
 }

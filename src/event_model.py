@@ -107,7 +107,23 @@ class ApplianceProfile:
         # expected power interval of every combination
         self.combo_lo_ = COMBOS @ self.lo_ + self.off_lo_ - self.margin_W
         self.combo_hi_ = COMBOS @ self.hi_ + self.off_hi_ + self.margin_W
+        # steady-state signature (mean / spread of power and clean PF) of every combination
+        pfc = clean_pf(steady["power_W"], steady["pf"])
+        code = steady[APPLIANCES].astype(int).astype(str).agg("".join, axis=1).map(lambda c: int(c, 2)).to_numpy()
+        self.sig_ = np.zeros((16, 4))
+        for c in range(16):
+            m = code == c
+            p, f = steady["power_W"].to_numpy()[m], pfc[m]
+            if m.sum() >= 3:
+                self.sig_[c] = [p.mean(), max(p.std(), 3.0), f.mean(), max(f.std(), 0.008)]
+            else:                                  # unseen combination: wide, uninformative signature
+                self.sig_[c] = [COMBOS[c] @ self.typical_, 100.0, 0.98, 0.05]
         return self
+
+    def signature_nll(self, combo_idx: int, p_mean: float, pf_mean: float) -> float:
+        """Gaussian negative log-likelihood of (mean power, mean PF) under a combination's signature."""
+        mp, sp, mf, sf = self.sig_[combo_idx]
+        return 0.5 * ((p_mean - mp) / sp) ** 2 + np.log(sp) + 0.5 * ((pf_mean - mf) / sf) ** 2 + np.log(sf)
 
     def residual(self, P: float, combo_idx=None) -> np.ndarray | float:
         """Distance (W) from P to each combination's power interval (0 = consistent)."""
@@ -160,7 +176,8 @@ class EventTracker:
 
     def __init__(self, classifier, profile: ApplianceProfile, threshold_W: float = 40.0, lag: int = 2,
                  self_correct: bool = True, tolerance_W: float = 40.0, persist: int = 2,
-                 change_cost_W: float = 30.0, corrector=None, split_events: bool = True):
+                 change_cost_W: float = 30.0, corrector=None, split_events: bool = True,
+                 fit_weight: float = 0.0):
         self.clf = classifier
         self.profile = profile
         self.threshold_W, self.lag = threshold_W, lag
@@ -169,6 +186,8 @@ class EventTracker:
         self.corrector = corrector    # optional callable(P, I, PF, state) -> state  (hybrid with Model A)
         # v2: a new jump during the settling window starts a new event (unless it is a surge fading away)
         self.split_events = split_events
+        # v3: weight of the "what is left after an OFF switch" check (0 = off)
+        self.fit_weight = fit_weight
         self.reset()
 
     def reset(self):
@@ -192,11 +211,29 @@ class EventTracker:
         proba = np.zeros(4)
         p = self.clf.predict_proba(pd.DataFrame(feats, columns=EVENT_FEATURES))[0]
         proba[np.asarray(self.clf.classes_, int)] = p
-        proba = np.where(feasible, proba + 1e-9, -1.0)
-        k = int(np.argmax(proba))
+        score = np.where(feasible, np.log(proba + 1e-3), -np.inf)
+        if step < 0 and self.fit_weight > 0 and feasible.sum() > 1 and s > t0:
+            score = score - self.fit_weight * self._remaining_fit_cost(t0, s, before_state, feasible)
+        k = int(np.argmax(score))
         new = before_state.copy()
         new[k] = 1 if step > 0 else 0
         return new
+
+    def _remaining_fit_cost(self, t0: int, s: int, before_state: np.ndarray, feasible: np.ndarray) -> np.ndarray:
+        """v3, OFF events: how badly the readings AFTER the switch fit each possible remaining combination.
+
+        For every appliance k that could have switched off, the remaining combination is `before - k`.
+        The mean power and mean power factor of the samples after the switch are compared with that
+        combination's typical steady-state signature (Gaussian negative log-likelihood, learned from the
+        training data). Averaging several samples smooths the power-factor noise of small loads.
+        """
+        P = np.asarray(self.P[t0 + 1: s + 1]); PFc = np.asarray(self.PFc[t0 + 1: s + 1])
+        p_mean, pf_mean = float(P.mean()), float(PFc.mean())
+        cost = np.full(4, np.inf)
+        for k in np.where(feasible)[0]:
+            remaining = before_state.copy(); remaining[k] = 0
+            cost[k] = self.profile.signature_nll(combo_index(remaining), p_mean, pf_mean)
+        return cost
 
     def _min_step_W(self) -> float:
         """Smallest settled step accepted as a switch.
@@ -310,6 +347,7 @@ def tracker_params(trial, version: int = 2) -> dict:
     version 1: the power-sum check could be switched off and second switches inside the settling
                window were ignored.
     version 2: the power-sum check is always on and second switches start a new event.
+    version 3: as version 2, plus the "what is left after an OFF switch" check (`fit_weight`).
     """
     p = {
         "threshold_W": trial.suggest_float("threshold_W", 25.0, 100.0),
@@ -317,6 +355,8 @@ def tracker_params(trial, version: int = 2) -> dict:
         "self_correct": trial.suggest_categorical("self_correct", [True, False]) if version == 1 else True,
         "margin_W": trial.suggest_float("margin_W", 0.0, 40.0),
     }
+    if version >= 3:
+        p["fit_weight"] = trial.suggest_float("fit_weight", 0.0, 3.0)
     if p["self_correct"]:
         p["tolerance_W"] = trial.suggest_float("tolerance_W", 5.0, 120.0)
         p["persist"] = trial.suggest_int("persist", 1, 6)
@@ -405,4 +445,5 @@ def make_tracker(trial, clf_key: str, train_df: pd.DataFrame, event_table: pd.Da
     profile = ApplianceProfile(margin_W=p["margin_W"]).fit(train_df)
     kw = {k: p[k] for k in ("tolerance_W", "persist", "change_cost_W") if k in p}
     return EventTracker(clf, profile, threshold_W=p["threshold_W"], lag=p["lag"],
-                        self_correct=p["self_correct"], corrector=corrector, split_events=(version >= 2), **kw)
+                        self_correct=p["self_correct"], corrector=corrector, split_events=(version >= 2),
+                        fit_weight=p.get("fit_weight", 0.0), **kw)

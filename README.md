@@ -24,17 +24,21 @@ are ON** at any moment:
 | 4. Model A: snapshot classifiers + hyper-parameter tuning | [`04_model_A_snapshot.ipynb`](notebooks/04_model_A_snapshot.ipynb) | ✅ Done |
 | 5. Model B: event-based detector | [`05_model_B_event.ipynb`](notebooks/05_model_B_event.ipynb) | ✅ Done |
 | 6. Final comparison (incl. hybrid model) | [`06_final_comparison.ipynb`](notebooks/06_final_comparison.ipynb) | ✅ Done |
-| 7. Live inference from the meter (serial / Tera Term log) | [`realtime/`](realtime/) | ✅ Ready for live testing |
+| 7. Live inference from the meter (serial / Tera Term log) | [`realtime/`](realtime/) | ✅ Done |
+| 8. Live test and tracker v3 | [`07_live_test.ipynb`](notebooks/07_live_test.ipynb) | ✅ Done |
 
 ## Result at a glance
 
-**Final model: Hybrid (event-based Model B v2, with start-up and corrections from Model A)**
+**Final model: Hybrid v3 (event-based tracker v3, with start-up and corrections from Model A)**
 
-| | Rule-based | Model A | Model B v2 | **Hybrid (final)** |
+| | Rule-based | Model A | Hybrid v2 | **Hybrid v3 (final)** |
 |---|---|---|---|---|
-| Cross-validation (all 4 appliances correct) | 0.842 | 0.898 | 0.939 | **0.939** |
-| Test block | 0.716 | 0.798 | 0.984 | **0.984** |
-| Start-up while appliances are already ON | 0.715 | 0.846 | 0.844 | **0.944** |
+| Cross-validation (all 4 appliances correct) | 0.842 | 0.898 | 0.939 | **0.963** |
+| Test block | 0.716 | 0.798 | 0.984 | 0.951 |
+| **Live session** (meter streaming over USB) | – | – | 0.753 | **0.941** |
+| Start-up while appliances are already ON | 0.715 | 0.846 | 0.944 | 0.859 |
+
+Hybrid v2 was the final model of notebook 06; the live test (notebook 07) exposed a weakness that tracker v3 fixes.
 
 ![Final scorecard](reports/figures/37_final_scorecard.png)
 
@@ -216,6 +220,32 @@ recovers much better when tracking starts while appliances are already ON (reboo
 - One recording day, one house, 5-second resolution.
 
 ![Start-up mid-use](reports/figures/35_cold_start.png)
+
+---
+
+## Live test and tracker v3
+
+The hybrid v2 model was run live: the meter streamed over USB, Tera Term logged the serial output and
+[`realtime/live_predict.py`](realtime/live_predict.py) predicted the appliances as the data arrived
+(7 minutes, 17 switches, saved in [`data/live/`](data/live/)).
+
+**Finding:** live accuracy was only **0.753**. Both big errors were the straightener switching OFF while the 100 W
+bulb stayed ON: the tuned v2 event classifier only used step size and surge, and always blamed the bulb for small
+OFF steps. Training had just 9 such switches, and both in the test block happened to be the bulb.
+
+**Tracker v3** checks *what is left* after an ambiguous OFF switch: the mean power and power factor after the
+switch are compared with the learned signature of each possible remaining combination (e.g. "100 W bulb alone" =
+129 ± 3 W at PF ≈ 0.99, "straightener alone" = wide power range at PF ≈ 0.96). Re-tuned and selected by CV only:
+
+| | Hybrid v2 | **Hybrid v3** |
+|---|---|---|
+| CV exact match | 0.939 | **0.963** |
+| Live session | 0.753 | **0.941** (every switch correct once settled) |
+| Test block | 0.984 | 0.951 (one ambiguous switch: 100 W off next to a hot straightener) |
+
+*The live session prompted v3, so its 0.941 is not independent; a second live session is the next check.*
+
+![Live session: v2 vs v3](reports/figures/39_live_v2_vs_v3.png)
 
 ---
 
