@@ -21,8 +21,8 @@ are ON** at any moment:
 | 1. Data loading & validation | [`01_data_loading.ipynb`](notebooks/01_data_loading.ipynb) | ✅ Done |
 | 2. Exploratory data analysis | [`02_eda.ipynb`](notebooks/02_eda.ipynb) | ✅ Done |
 | 3. Feature engineering | [`03_feature_engineering.ipynb`](notebooks/03_feature_engineering.ipynb) | ✅ Done |
-| 4. Model A: snapshot classifiers + hyper-parameter tuning | `04_model_A_snapshot.ipynb` | ⏳ Next |
-| 5. Model B: event-based detector | `05_model_B_event.ipynb` | ⏳ |
+| 4. Model A: snapshot classifiers + hyper-parameter tuning | [`04_model_A_snapshot.ipynb`](notebooks/04_model_A_snapshot.ipynb) | ✅ Done |
+| 5. Model B: event-based detector | `05_model_B_event.ipynb` | ⏳ Next |
 | 6. Final comparison (incl. hybrid model) | `06_final_comparison.ipynb` | ⏳ |
 | 7. Real-time Wi-Fi inference | `realtime/` | ⏳ |
 
@@ -95,6 +95,39 @@ memorises block-specific patterns. History needs to be used in a structured way,
 what the event-based model does.
 
 ![Feature ablation](reports/figures/19_feature_ablation.png)
+
+---
+
+## Model A: snapshot classifiers (tuned)
+
+11 models, each tuned with **Optuna** on 5 feature sets ([`scripts/tune_model_a.py`](scripts/tune_model_a.py)):
+54 studies, 5,723 trials. Each study ran **at least 100 trials** and stopped once the best score had not improved
+for 30 trials (cap 250). Objective: *exact match* (all 4 appliances correct) under leave-one-block-out CV on the
+training blocks. The test block was used once, at the end.
+
+| Model | Best feature set | CV exact match | Test exact match | Latency / sample |
+|---|---|---|---|---|
+| **Extra Trees** (selected by CV) | snapshot_plus | **0.901** | 0.798 | 24 ms |
+| Random Forest | snapshot_plus | 0.892 | 0.749 | 26 ms |
+| Decision Tree | snapshot_plus | 0.881 | 0.754 | 0.7 ms |
+| k-Nearest Neighbours | snapshot | 0.870 | 0.803 | 1.9 ms |
+| Gradient Boosting (HistGB) | snapshot | 0.868 | 0.803 | 19 ms |
+| SVM (RBF) | snapshot_plus | 0.867 | 0.716 | 1.1 ms |
+| XGBoost | compact_history | 0.860 | 0.776 | 4.1 ms |
+| LightGBM | snapshot | 0.855 | 0.825 | 1.1 ms |
+| Rule-based (power sum) | snapshot_plus | 0.842 | 0.716 | 0.6 ms |
+| Logistic Regression | snapshot_plus | 0.818 | 0.738 | 0.9 ms |
+| Neural network (MLP) | snapshot | 0.800 | 0.809 | 1.0 ms |
+
+![Model A leaderboard](reports/figures/23_model_a_leaderboard.png)
+
+**Takeaways**
+- Compact feature sets win for every model, and a single 16-class prediction beats four yes/no predictions.
+- The hair dryer is detected 100 % of the time. Nearly all errors are the two look-alike pairs:
+  *Straightener + 200W* vs *200W + 100W*, and *Dryer + 200W + 100W* vs *Dryer + Straightener + 200W*.
+- Test scores (0.72–0.83) are below CV. The test block is small (20 switches) and harder (more multi-appliance
+  combinations), so rankings on it are noisy; the final model is chosen by CV, not by test score.
+- A memory-less classifier plateaus around 80 % on unseen use, which is what Model B (event-based) targets.
 
 ---
 

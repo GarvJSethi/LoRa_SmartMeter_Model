@@ -1,0 +1,131 @@
+Trials per study: min 100, stop after 30 trials without improvement, max 250
+Stage 1: 51 studies
+[1/51] extra_trees              snapshot         combo      CV exact=0.896  trials=100 (0 pruned) best@52  935s
+[2/51] random_forest            snapshot         combo      CV exact=0.889  trials=115 (0 pruned) best@84  971s
+[3/51] extra_trees              snapshot_plus    combo      CV exact=0.901  trials=102 (0 pruned) best@71  1080s
+[4/51] random_forest            rolling          combo      CV exact=0.820  trials=100 (0 pruned) best@55  1344s
+[5/51] extra_trees              compact_history  combo      CV exact=0.898  trials=100 (0 pruned) best@49  574s
+[6/51] random_forest            snapshot_plus    combo      CV exact=0.892  trials=121 (0 pruned) best@90  1884s
+[7/51] extra_trees              rolling          combo      CV exact=0.854  trials=100 (0 pruned) best@16  1127s
+[8/51] xgboost                  snapshot         combo      CV exact=0.842  trials=125 (0 pruned) best@94  1237s
+[9/51] extra_trees              full             combo      CV exact=0.833  trials=100 (0 pruned) best@16  1549s
+[10/51] random_forest            compact_history  combo      CV exact=0.890  trials=109 (0 pruned) best@78  2765s
+[11/51] xgboost                  snapshot_plus    combo      CV exact=0.844  trials=100 (0 pruned) best@62  1352s
+[12/51] random_forest            full             combo      CV exact=0.789  trials=100 (0 pruned) best@53  3055s
+[13/51] mlp                      snapshot         combo      CV exact=0.800  trials=111 (0 pruned) best@80  3079s
+[14/51] lightgbm                 snapshot         combo      CV exact=0.855  trials=100 (0 pruned) best@61  621s
+[15/51] xgboost                  compact_history  combo      CV exact=0.860  trials=100 (0 pruned) best@48  1818s
+[16/51] mlp                      compact_history  combo      CV exact=0.791  trials=104 (0 pruned) best@73  3890s
+[17/51] xgboost                  rolling          combo      CV exact=0.814  trials=100 (0 pruned) best@52  1832s
+[18/51] lightgbm                 compact_history  combo      CV exact=0.854  trials=100 (1 pruned) best@12  1387s
+[19/51] lightgbm                 snapshot_plus    combo      CV exact=0.845  trials=100 (0 pruned) best@12  1490s
+[20/51] svm                      snapshot         combo      CV exact=0.866  trials=100 (0 pruned) best@39  64s
+[21/51] mlp                      rolling          combo      CV exact=0.672  trials=100 (0 pruned) best@67  4344s
+[22/51] svm                      snapshot_plus    combo      CV exact=0.867  trials=102 (0 pruned) best@71  75s
+[23/51] svm                      compact_history  combo      CV exact=0.832  trials=128 (1 pruned) best@97  111s
+[24/51] xgboost                  full             combo      CV exact=0.799  trials=100 (0 pruned) best@21  1913s
+[25/51] svm                      rolling          combo      CV exact=0.689  trials=109 (3 pruned) best@78  115s
+[26/51] knn                      snapshot         combo      CV exact=0.870  trials=100 (0 pruned) best@15  30s
+[27/51] knn                      snapshot_plus    combo      CV exact=0.843  trials=100 (0 pruned) best@2  25s
+[28/51] knn                      compact_history  combo      CV exact=0.816  trials=100 (0 pruned) best@2  29s
+[29/51] svm                      full             combo      CV exact=0.707  trials=100 (2 pruned) best@34  104s
+[30/51] knn                      rolling          combo      CV exact=0.616  trials=100 (0 pruned) best@2  36s
+[31/51] knn                      full             combo      CV exact=0.656  trials=100 (0 pruned) best@2  44s
+[32/51] lightgbm                 full             combo      CV exact=0.812  trials=100 (1 pruned) best@62  1541s
+[33/51] logistic_regression      snapshot         combo      CV exact=0.804  trials=116 (0 pruned) best@85  789s
+[34/51] logistic_regression      snapshot_plus    combo      CV exact=0.818  trials=100 (0 pruned) best@54  1106s
+[35/51] decision_tree            snapshot         combo      CV exact=0.880  trials=100 (0 pruned) best@16  18s
+[36/51] decision_tree            snapshot_plus    combo      CV exact=0.881  trials=100 (0 pruned) best@16  20s
+[37/51] decision_tree            compact_history  combo      CV exact=0.877  trials=100 (0 pruned) best@31  24s
+[38/51] decision_tree            rolling          combo      CV exact=0.762  trials=116 (0 pruned) best@85  48s
+[39/51] decision_tree            full             combo      CV exact=0.735  trials=117 (6 pruned) best@86  48s
+[40/51] logistic_regression      full             combo      CV exact=0.588  trials=100 (0 pruned) best@46  496s
+[41/51] rule_based               snapshot_plus    combo      CV exact=0.842  trials=100 (0 pruned) best@11  16s
+[42/51] lightgbm                 rolling          combo      CV exact=0.810  trials=160 (0 pruned) best@129  2805s
+[43/51] logistic_regression      compact_history  combo      CV exact=0.801  trials=100 (0 pruned) best@61  1319s
+[44/51] logistic_regression      rolling          combo      CV exact=0.684  trials=100 (0 pruned) best@53  2180s
+[45/51] mlp                      full             combo      CV exact=0.679  trials=100 (0 pruned) best@68  7340s
+[46/51] hist_gradient_boosting   snapshot         combo      CV exact=0.868  trials=100 (1 pruned) best@53  4158s
+[47/51] hist_gradient_boosting   snapshot_plus    combo      CV exact=0.862  trials=107 (1 pruned) best@76  4466s
+[48/51] mlp                      snapshot_plus    combo      CV exact=0.796  trials=142 (0 pruned) best@111  9332s
+[49/51] hist_gradient_boosting   rolling          combo      CV exact=0.791  trials=100 (0 pruned) best@36  6076s
+[50/51] hist_gradient_boosting   full             combo      CV exact=0.808  trials=100 (0 pruned) best@55  5768s
+[51/51] hist_gradient_boosting   compact_history  combo      CV exact=0.868  trials=109 (1 pruned) best@78  6226s
+Stage 2: 3 studies
+[1/3] decision_tree            snapshot_plus    multilabel CV exact=0.855  trials=100 (0 pruned) best@32  20s
+[2/3] extra_trees              snapshot_plus    multilabel CV exact=0.867  trials=130 (0 pruned) best@99  1142s
+--- resumed run Sun Nov 22 19:13:32 IST 2026
+Trials per study: min 100, stop after 30 trials without improvement, max 250
+Stage 1: 51 studies
+[1/51] mlp                      snapshot         combo      CV exact=0.800  trials=111 (0 pruned) best@80  3079s
+[2/51] mlp                      snapshot_plus    combo      CV exact=0.796  trials=142 (0 pruned) best@111  9332s
+[3/51] mlp                      compact_history  combo      CV exact=0.791  trials=104 (0 pruned) best@73  3890s
+[4/51] mlp                      full             combo      CV exact=0.679  trials=100 (0 pruned) best@68  7340s
+[5/51] mlp                      rolling          combo      CV exact=0.672  trials=100 (0 pruned) best@67  4344s
+[6/51] random_forest            snapshot         combo      CV exact=0.889  trials=115 (0 pruned) best@84  971s
+[7/51] random_forest            snapshot_plus    combo      CV exact=0.892  trials=121 (0 pruned) best@90  1883s
+[8/51] random_forest            compact_history  combo      CV exact=0.890  trials=109 (0 pruned) best@78  2765s
+[9/51] random_forest            rolling          combo      CV exact=0.820  trials=100 (0 pruned) best@55  1344s
+[10/51] extra_trees              snapshot_plus    combo      CV exact=0.901  trials=102 (0 pruned) best@71  1080s
+[11/51] extra_trees              snapshot         combo      CV exact=0.896  trials=100 (0 pruned) best@52  935s
+[12/51] extra_trees              compact_history  combo      CV exact=0.898  trials=100 (0 pruned) best@49  574s
+[13/51] extra_trees              full             combo      CV exact=0.833  trials=100 (0 pruned) best@16  1549s
+[14/51] extra_trees              rolling          combo      CV exact=0.854  trials=100 (0 pruned) best@16  1127s
+[15/51] random_forest            full             combo      CV exact=0.789  trials=100 (0 pruned) best@53  3055s
+[16/51] xgboost                  snapshot         combo      CV exact=0.842  trials=125 (0 pruned) best@94  1237s
+[17/51] xgboost                  snapshot_plus    combo      CV exact=0.844  trials=100 (0 pruned) best@62  1352s
+[18/51] xgboost                  compact_history  combo      CV exact=0.860  trials=100 (0 pruned) best@48  1818s
+[19/51] xgboost                  rolling          combo      CV exact=0.814  trials=100 (0 pruned) best@52  1832s
+[20/51] xgboost                  full             combo      CV exact=0.799  trials=100 (0 pruned) best@21  1913s
+[21/51] lightgbm                 snapshot         combo      CV exact=0.855  trials=100 (0 pruned) best@61  621s
+[22/51] lightgbm                 snapshot_plus    combo      CV exact=0.845  trials=100 (0 pruned) best@12  1490s
+[23/51] lightgbm                 compact_history  combo      CV exact=0.854  trials=100 (1 pruned) best@12  1387s
+[24/51] lightgbm                 rolling          combo      CV exact=0.810  trials=160 (0 pruned) best@129  2805s
+[25/51] lightgbm                 full             combo      CV exact=0.812  trials=100 (1 pruned) best@62  1541s
+[26/51] hist_gradient_boosting   snapshot         combo      CV exact=0.868  trials=100 (1 pruned) best@53  4158s
+[27/51] hist_gradient_boosting   snapshot_plus    combo      CV exact=0.862  trials=107 (1 pruned) best@76  4466s
+[28/51] hist_gradient_boosting   compact_history  combo      CV exact=0.868  trials=109 (1 pruned) best@78  6226s
+[29/51] hist_gradient_boosting   rolling          combo      CV exact=0.791  trials=100 (0 pruned) best@36  6076s
+[30/51] hist_gradient_boosting   full             combo      CV exact=0.808  trials=100 (0 pruned) best@55  5768s
+[31/51] svm                      snapshot         combo      CV exact=0.866  trials=100 (0 pruned) best@39  64s
+[32/51] svm                      snapshot_plus    combo      CV exact=0.867  trials=102 (0 pruned) best@71  75s
+[33/51] svm                      rolling          combo      CV exact=0.689  trials=109 (3 pruned) best@78  115s
+[34/51] svm                      compact_history  combo      CV exact=0.832  trials=128 (1 pruned) best@97  111s
+[35/51] svm                      full             combo      CV exact=0.707  trials=100 (2 pruned) best@34  104s
+[36/51] knn                      snapshot         combo      CV exact=0.870  trials=100 (0 pruned) best@15  30s
+[37/51] knn                      snapshot_plus    combo      CV exact=0.843  trials=100 (0 pruned) best@2  25s
+[38/51] knn                      compact_history  combo      CV exact=0.816  trials=100 (0 pruned) best@2  29s
+[39/51] knn                      rolling          combo      CV exact=0.616  trials=100 (0 pruned) best@2  36s
+[40/51] logistic_regression      snapshot         combo      CV exact=0.804  trials=116 (0 pruned) best@85  789s
+[41/51] logistic_regression      snapshot_plus    combo      CV exact=0.818  trials=100 (0 pruned) best@54  1106s
+[42/51] knn                      full             combo      CV exact=0.656  trials=100 (0 pruned) best@2  44s
+[43/51] logistic_regression      rolling          combo      CV exact=0.684  trials=100 (0 pruned) best@53  2180s
+[44/51] logistic_regression      full             combo      CV exact=0.588  trials=100 (0 pruned) best@46  496s
+[45/51] logistic_regression      compact_history  combo      CV exact=0.801  trials=100 (0 pruned) best@61  1319s
+[46/51] decision_tree            snapshot         combo      CV exact=0.880  trials=100 (0 pruned) best@16  18s
+[47/51] decision_tree            snapshot_plus    combo      CV exact=0.881  trials=100 (0 pruned) best@16  20s
+[48/51] decision_tree            compact_history  combo      CV exact=0.877  trials=100 (0 pruned) best@31  24s
+[49/51] decision_tree            rolling          combo      CV exact=0.762  trials=116 (0 pruned) best@85  48s
+[50/51] decision_tree            full             combo      CV exact=0.735  trials=117 (6 pruned) best@86  48s
+[51/51] rule_based               snapshot_plus    combo      CV exact=0.842  trials=100 (0 pruned) best@11  16s
+Stage 2: 3 studies
+[1/3] extra_trees              snapshot_plus    multilabel CV exact=0.867  trials=130 (0 pruned) best@99  1142s
+[2/3] decision_tree            snapshot_plus    multilabel CV exact=0.855  trials=100 (0 pruned) best@32  20s
+[3/3] random_forest            snapshot_plus    multilabel CV exact=0.864  trials=100 (0 pruned) best@38  1281s
+Done in 21.5 min. Saved C:\Users\Garv\OneDrive\Desktop\Model_SmartMeter\reports\model_a\tuning_results.csv
+                 model     feature_set     target  cv_exact_match  cv_macro_f1
+           extra_trees   snapshot_plus      combo        0.900590     0.913532
+           extra_trees compact_history      combo        0.898062     0.910756
+           extra_trees        snapshot      combo        0.896377     0.908352
+         random_forest   snapshot_plus      combo        0.892165     0.901710
+         random_forest compact_history      combo        0.889638     0.900719
+         random_forest        snapshot      combo        0.888795     0.897738
+         decision_tree   snapshot_plus      combo        0.881213     0.896008
+         decision_tree        snapshot      combo        0.879528     0.895747
+         decision_tree compact_history      combo        0.877001     0.888697
+                   knn        snapshot      combo        0.870261     0.887835
+hist_gradient_boosting        snapshot      combo        0.867734     0.887573
+hist_gradient_boosting compact_history      combo        0.867734     0.890082
+                   svm   snapshot_plus      combo        0.866891     0.885887
+           extra_trees   snapshot_plus multilabel        0.866891     0.891092
+                   svm        snapshot      combo        0.866049     0.892931
