@@ -22,8 +22,8 @@ are ON** at any moment:
 | 2. Exploratory data analysis | [`02_eda.ipynb`](notebooks/02_eda.ipynb) | ✅ Done |
 | 3. Feature engineering | [`03_feature_engineering.ipynb`](notebooks/03_feature_engineering.ipynb) | ✅ Done |
 | 4. Model A: snapshot classifiers + hyper-parameter tuning | [`04_model_A_snapshot.ipynb`](notebooks/04_model_A_snapshot.ipynb) | ✅ Done |
-| 5. Model B: event-based detector | `05_model_B_event.ipynb` | ⏳ Next |
-| 6. Final comparison (incl. hybrid model) | `06_final_comparison.ipynb` | ⏳ |
+| 5. Model B: event-based detector | [`05_model_B_event.ipynb`](notebooks/05_model_B_event.ipynb) | ✅ Done |
+| 6. Final comparison (incl. hybrid model) | `06_final_comparison.ipynb` | ⏳ Next |
 | 7. Real-time Wi-Fi inference | `realtime/` | ⏳ |
 
 ---
@@ -128,6 +128,52 @@ training blocks. The test block was used once, at the end.
 - Test scores (0.72–0.83) are below CV. The test block is small (20 switches) and harder (more multi-appliance
   combinations), so rankings on it are noisy; the final model is chosen by CV, not by test score.
 - A memory-less classifier plateaus around 80 % on unseen use, which is what Model B (event-based) targets.
+
+---
+
+## Model B: event-based tracking
+
+Model B watches for **switch events** instead of guessing from each reading
+([`src/event_model.py`](src/event_model.py)):
+
+1. **Event detector:** a power jump larger than a threshold marks a switch.
+2. **Event classifier:** describes the switch (settled step, surge, power-factor change, ...) and predicts which
+   appliance caused it. It answers provisionally at once and finalises within a few samples.
+3. **State tracker:** an ON switch can only belong to an appliance that is OFF, and vice versa.
+4. **Power-sum check:** if the measured power stays inconsistent with the appliances believed ON, the state is
+   re-synchronised to the closest consistent combination.
+
+7 event classifiers were tuned with Optuna together with the tracker settings
+([`scripts/tune_model_b.py`](scripts/tune_model_b.py)), with the same protocol as Model A.
+
+**Version 1 → version 2.** In version 1 the power-sum check was optional, and tuning switched it off for the CV
+winner. On the test block, where some switches are only 10–15 s apart (never in training), one merged switch left
+that tracker wrong for the rest of the block (CV 0.93 → test 0.39). Version 2 keeps the check always on, splits a
+second jump inside the settling window into its own event, and ignores steps smaller than half the smallest
+appliance. It was re-tuned and selected by CV only. *Because these rules were prompted by the test block, the v2
+test score is not fully blind; a new recording is needed for an independent estimate.*
+
+| Event classifier (v2) | CV exact match | Test exact match |
+|---|---|---|
+| **Decision Tree** (selected) | **0.939** | **0.984** |
+| Random Forest | 0.926 | 0.995 |
+| XGBoost | 0.912 | 0.984 |
+| SVM (RBF) | 0.896 | 1.000 |
+| k-NN | 0.866 | 0.617 |
+| Logistic Regression | 0.826 | 0.672 |
+| Nearest-centroid rule | 0.762 | 0.699 |
+
+| Test block | Model A (Extra Trees) | Model B (Decision Tree tracker) |
+|---|---|---|
+| All 4 appliances correct | 0.798 | **0.984** |
+| Hair straightener | 0.836 | **0.984** |
+| 100 W bulb | 0.798 | **1.000** |
+| 200 W bulb | 0.973 | **0.984** |
+| Hair dryer | 1.000 | 1.000 |
+
+![Model A vs Model B](reports/figures/30_model_a_vs_b.png)
+
+![Model B on the test block](reports/figures/32_model_b_test_timeline.png)
 
 ---
 

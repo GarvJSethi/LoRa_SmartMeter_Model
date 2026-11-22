@@ -1,0 +1,17 @@
+Trials per study: min 100, stop after 30 trials without improvement, max 250
+[1/7] rule                 CV exact=0.762  trials=140 (0 pruned) best@109  95s
+[2/7] decision_tree        CV exact=0.939  trials=100 (0 pruned) best@67  100s
+[3/7] knn                  CV exact=0.866  trials=100 (0 pruned) best@37  142s
+[4/7] logistic_regression  CV exact=0.826  trials=122 (0 pruned) best@91  170s
+[5/7] svm                  CV exact=0.896  trials=100 (0 pruned) best@27  127s
+[6/7] xgboost              CV exact=0.912  trials=100 (0 pruned) best@51  290s
+[7/7] random_forest        CV exact=0.926  trials=100 (0 pruned) best@30  1097s
+Done in 20.0 min. Saved reports\model_b\tuning_results.csv
+         classifier  cv_exact_match  cv_macro_f1  n_trials
+      decision_tree        0.939343     0.951491       100
+      random_forest        0.925864     0.941079       100
+            xgboost        0.912384     0.933594       100
+                svm        0.896377     0.916693       100
+                knn        0.866049     0.884094       100
+logistic_regression        0.826453     0.846885       122
+               rule        0.762426     0.782850       140

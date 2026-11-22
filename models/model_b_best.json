@@ -1,0 +1,28 @@
+{
+  "classifier": "decision_tree",
+  "classifier_name": "Decision Tree",
+  "params": {
+    "change_cost_W": 15.6065191493337,
+    "lag": 3,
+    "margin_W": 23.52488403577912,
+    "max_depth": 3,
+    "min_samples_leaf": 8,
+    "persist": 4,
+    "threshold_W": 25.07144482168826,
+    "tolerance_W": 54.45137646049899
+  },
+  "event_features": [
+    "step_W",
+    "abs_step_W",
+    "surge_W",
+    "surge_ratio",
+    "pf_before",
+    "pf_after",
+    "pf_change",
+    "q_change_var",
+    "power_before_W",
+    "samples_after"
+  ],
+  "cv_exact_match": 0.9393428812131424,
+  "test_exact_match": 0.9836065573770492
+}
