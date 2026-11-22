@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Trained model binaries (re-created by the training notebooks)
+models/*.joblib
+models/*.pkl
+
+# Generated data
+data/processed/*.csv
+data/processed/*.parquet
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
