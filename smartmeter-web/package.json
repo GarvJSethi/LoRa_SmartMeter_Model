@@ -1,0 +1,17 @@
+{
+  "name": "smartmeter-web",
+  "version": "1.0.0",
+  "description": "Dashboard for the BTP smart energy meter: live power, appliance detection, tariff and admin tools",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "dev": "node --disable-warning=ExperimentalWarning server/index.js --simulate"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "dependencies": {
+    "mqtt": "^5.16.1"
+  }
+}

@@ -1,0 +1,25 @@
+# One-click deploy of the Wattwise website (smartmeter-web/) on Render.
+# Free plan: good for demos. It sleeps after ~15 min without visitors and its disk is reset on each deploy;
+# logins are unaffected because accounts live in Supabase.
+services:
+  - type: web
+    name: wattwise
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: smartmeter-web
+    buildCommand: npm ci
+    startCommand: node --disable-warning=ExperimentalWarning server/index.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 22.14.0
+      - key: SIMULATE
+        value: "1"            # include the simulated demo meter so dashboards have data during the presentation
+      - key: SUPABASE_URL
+        value: https://pohhzvkoadlifihxiodf.supabase.co
+      - key: SUPABASE_ANON_KEY  # public anon key; access is limited by row-level security
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvaGh6dmtvYWRsaWZpaHhpb2RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU0OTA0NDgsImV4cCI6MjExMTA2NjQ0OH0.sF8kLKXPuUkGdrBx1H0GdG61fBd7phKflDOEcCre20c
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false             # optional secret: paste it in the Render dashboard, never in git
