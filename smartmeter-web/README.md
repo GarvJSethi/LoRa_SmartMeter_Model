@@ -126,7 +126,7 @@ change first appeared, so short-lived guesses never reach the timeline.
 | Variable | Default | Meaning |
 |---|---|---|
 | `PORT` | `8080` | web port |
-| `MQTT_BROKERS` | emqx, hivemq, mosquitto (TCP 1883) | comma-separated broker URLs, tried in order |
+| `MQTT_BROKERS` | `mqtt://broker.emqx.io:1883,wss://broker.emqx.io:8084/mqtt` | ways into the meter's broker, tried in order (WebSockets get through networks that block 1883) |
 | `TOPIC_PREFIX` | `btp/meter` | topic prefix |
 | `MQTT` | `1` | `0` disables MQTT |
 | `SIMULATE` | `0` | `1` (or `--simulate`) runs the virtual meter |
@@ -142,6 +142,16 @@ change first appeared, so short-lived guesses never reach the timeline.
 Typical appliance powers (used for cost estimates and the mismatch check) are in `server/config.js` →
 `APPLIANCES`. They are the meter's uncalibrated readings: dryer 1485 W, 200 W bulb 227 W, 100 W bulb 129 W,
 straightener 116 W.
+
+## No readings? Checklist
+
+1. **The website only reads MQTT.** A USB cable to the laptop carries the serial console (Tera Term), not data for
+   the website. The meter's Wi-Fi module must be connected and publishing.
+2. Run `node scripts/check-broker.mjs` (from `smartmeter-web/`). It listens on the public brokers for 25 s:
+   - data messages for `pm33-…` = the meter publishes; check the website's broker badge.
+   - only `status "offline"` = the meter is not connected to the broker (check Wi-Fi, see the Tera Term output).
+3. "Broker disconnected" in the console = this computer cannot reach the broker; the server then tries
+   `wss://broker.emqx.io:8084/mqtt` automatically.
 
 ## Running 24/7
 

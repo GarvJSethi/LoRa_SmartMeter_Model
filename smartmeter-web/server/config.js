@@ -21,9 +21,11 @@ export const config = {
   dbPath: env('DB_PATH', path.join(root, 'data', 'smartmeter.db')),
   seedPath: env('SEED_PATH', path.join(root, 'data', 'seed.json')),
 
-  // MQTT: tried in order, the next one is used if a broker cannot be reached
-  brokers: env('MQTT_BROKERS',
-    'mqtt://broker.emqx.io:1883,mqtt://broker.hivemq.com:1883,mqtt://test.mosquitto.org:1883').split(',').map(s => s.trim()),
+  // MQTT: tried in order, the next one is used if one cannot be reached.
+  // All defaults point at the broker the meter publishes to (broker.emqx.io): plain MQTT first, then MQTT over
+  // secure WebSockets on port 8084, which gets through networks that block port 1883.
+  // (Switching to a different broker would not help: the meter's messages only exist on its own broker.)
+  brokers: env('MQTT_BROKERS', 'mqtt://broker.emqx.io:1883,wss://broker.emqx.io:8084/mqtt').split(',').map(s => s.trim()),
   topicPrefix: env('TOPIC_PREFIX', 'btp/meter'),
   mqttEnabled: env('MQTT', '1') !== '0',
 
